@@ -35,10 +35,10 @@ gantt
     title Roadmap HeroPi
     dateFormat  YYYY-MM-DD
     section Beta
-    Prototype UI        :done,    des1, 2024-06-01, 15d
-    Intégration Pi Auth :active,  des2, 2024-07-01, 20d
+    Prototype UI        :done,    des1, 2025-06-01, 15d
+    Intégration Pi Auth :active,  des2, 2025-07-01, 20d
     section Live
-    Lancement V1        :         des3, 2024-09-01, 30d
+    Lancement V1        :         des3, 2025-09-01, 30d
 
 🤝 Comment Contribuer ?
 Forkez le projet
