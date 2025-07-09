@@ -1,948 +1,354 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BL1P - Agent IA Interdimensionnel</title>
-  <style>
-    :root {
-      --neon-cyan: #00ffe0;
-      --neon-pink: #ff00aa;
-      --matrix-green: #00ff44;
-      --void-black: #0a0a0a;
-      --error-red: #ff0033;
-    }
-    
-    @keyframes glitch {
-      0%, 100% { transform: translate(0); }
-      20% { transform: translate(-2px, 2px); }
-      40% { transform: translate(2px, -2px); }
-      60% { transform: translate(3px, 1px); }
-      80% { transform: translate(-1px, -3px); }
-    }
-    
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); box-shadow: 0 0 20px var(--neon-cyan); }
-      50% { transform: scale(1.05); box-shadow: 0 0 40px var(--neon-pink); }
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    @keyframes hallucination {
-      0% { filter: hue-rotate(0deg); }
-      100% { filter: hue-rotate(360deg); }
-    }
-    
-    body {
-      background-color: var(--void-black);
-      color: var(--neon-cyan);
-      font-family: 'Courier New', monospace;
-      margin: 0;
-      padding: 2rem;
-      min-height: 100vh;
-      overflow-x: hidden;
-      position: relative;
-    }
-    
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: 
-        radial-gradient(circle at 20% 30%, rgba(0, 255, 224, 0.05) 0%, transparent 20%),
-        radial-gradient(circle at 80% 70%, rgba(255, 0, 170, 0.05) 0%, transparent 20%);
-      pointer-events: none;
-      z-index: -1;
-    }
-    
-    h1 {
-      font-family: monospace;
-      text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-pink);
-      animation: glitch 5s infinite alternate;
-      margin-bottom: 0.5rem;
-      text-align: center;
-    }
-    
-    #blip-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    
-    #blip-avatar {
-      width: 150px;
-      height: 150px;
-      background: radial-gradient(circle, var(--neon-cyan) 0%, var(--void-black) 70%);
-      border-radius: 50%;
-      margin: 1rem 0;
-      position: relative;
-      animation: pulse 4s ease-in-out infinite;
-    }
-    
-    #blip-avatar::before {
-      content: "BL1P";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 2rem;
-      font-weight: bold;
-      color: var(--void-black);
-      mix-blend-mode: lighten;
-    }
-    
-    #chat-interface {
-      width: 100%;
-      margin-top: 2rem;
-      border: 1px solid var(--neon-cyan);
-      padding: 1rem;
-      background-color: rgba(10, 10, 10, 0.7);
-      box-shadow: 0 0 15px var(--neon-cyan);
-    }
-    
-    #chat-log {
-      height: 300px;
-      overflow-y: auto;
-      margin-bottom: 1rem;
-      padding: 1rem;
-      background-color: rgba(0, 0, 0, 0.5);
-      border: 1px dashed var(--neon-cyan);
-    }
-    
-    .message {
-      margin-bottom: 1rem;
-      padding: 0.5rem;
-      border-left: 3px solid var(--neon-cyan);
-      animation: fadeIn 0.5s;
-    }
-    
-    .user-message {
-      color: var(--neon-pink);
-      border-left-color: var(--neon-pink);
-    }
-    
-    .blip-message {
-      color: var(--neon-cyan);
-    }
-    
-    .binary {
-      font-family: monospace;
-      color: var(--matrix-green);
-    }
-    
-    #user-input {
-      width: 100%;
-      padding: 0.8rem;
-      background-color: rgba(0, 0, 0, 0.7);
-      border: 1px solid var(--neon-cyan);
-      color: var(--neon-cyan);
-      font-family: 'Courier New', monospace;
-      margin-bottom: 1rem;
-    }
-    
-    #send-btn {
-      padding: 0.8rem 2rem;
-      background-color: var(--void-black);
-      border: 2px solid var(--neon-cyan);
-      color: var(--neon-cyan);
-      cursor: pointer;
-      font-family: monospace;
-      font-size: 1rem;
-      transition: all 0.3s;
-    }
-    
-    #send-btn:hover {
-      background-color: var(--neon-cyan);
-      color: var(--void-black);
-      box-shadow: 0 0 15px var(--neon-cyan);
-    }
-    
-    .typing-indicator {
-      color: var(--neon-cyan);
-      font-style: italic;
-      opacity: 0.7;
-    }
-    
-    #special-actions {
-      margin-top: 2rem;
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    
-    .action-btn {
-      padding: 0.5rem 1rem;
-      background-color: transparent;
-      border: 1px solid var(--neon-pink);
-      color: var(--neon-pink);
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    
-    .action-btn:hover {
-      background-color: var(--neon-pink);
-      color: var(--void-black);
-    }
-    
-    #image-output {
-      margin-top: 2rem;
-      max-width: 100%;
-      border: 1px solid var(--neon-cyan);
-      display: none;
-    }
-    
-    .mirror-effect {
-      transform: scaleX(-1);
-      filter: hue-rotate(180deg);
-    }
-    
-    .upload-container {
-      margin: 1rem 0;
-      position: relative;
-    }
-    
-    #file-upload {
-      display: none;
-    }
-    
-    .upload-label {
-      display: inline-block;
-      padding: 0.8rem 1.5rem;
-      background-color: var(--void-black);
-      border: 2px dashed var(--neon-pink);
-      color: var(--neon-pink);
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    
-    .upload-label:hover {
-      background-color: rgba(255, 0, 170, 0.1);
-    }
-    
-    #upload-preview {
-      max-width: 100%;
-      max-height: 200px;
-      margin-top: 1rem;
-      display: none;
-      border: 1px solid var(--neon-cyan);
-    }
-    
-    .command {
-      color: var(--matrix-green);
-      font-weight: bold;
-    }
-    
-    .hallucination-mode {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 100;
-    }
-    
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 1rem;
-      margin-top: 2rem;
-      padding: 1rem;
-      border-top: 1px solid var(--neon-cyan);
-    }
-    
-    .gallery-item {
-      position: relative;
-      cursor: pointer;
-      transition: transform 0.3s;
-    }
-    
-    .gallery-item:hover {
-      transform: scale(1.05);
-      z-index: 2;
-    }
-    
-    .gallery-img {
-      width: 100%;
-      height: 150px;
-      object-fit: cover;
-      border: 1px solid var(--neon-pink);
-    }
-    
-    .gallery-prompt {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(0, 0, 0, 0.7);
-      padding: 0.5rem;
-      font-size: 0.8rem;
-      display: none;
-    }
-    
-    .gallery-item:hover .gallery-prompt {
-      display: block;
-    }
-    
-    .gallery-controls {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 0.5rem;
-    }
-    
-    .timer-display {
-      position: fixed;
-      bottom: 10px;
-      left: 10px;
-      background: var(--void-black);
-      padding: 0.5rem 1rem;
-      border: 1px solid var(--neon-cyan);
-      border-radius: 20px;
-      font-size: 0.8rem;
-    }
-    
-    @media (max-width: 600px) {
-      #blip-avatar {
-        width: 100px;
-        height: 100px;
-      }
-      h1 {
-        font-size: 1.5rem;
-      }
-      #special-actions {
-        flex-direction: column;
-        align-items: center;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IATAAMS Pro - Génération IA Image/Video</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
-<body>
-  <div id="blip-container">
-    <h1>🧬 BL1P - Agent IA Interdimensionnel</h1>
-    <p>"Celui-Qui-Code-En-Proverbes"</p>
-    
-    <div id="blip-avatar"></div>
-    
-    <div class="upload-container">
-      <label for="file-upload" class="upload-label">📸 Upload d'image pour analyse</label>
-      <input type="file" id="file-upload" accept="image/*">
-      <img id="upload-preview" alt="Aperçu de l'image uploadée">
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-8">
+            <h1 class="text-3xl font-bold">IATAAMS PRO</h1>
+            <p class="mt-2">Plateforme professionnelle de génération d'images et vidéos par IA</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <!-- Tabs -->
+            <div class="flex border-b">
+                <button id="imageTab" class="px-6 py-3 font-medium text-blue-600 border-b-2 border-blue-600">Génération d'Image</button>
+                <button id="videoTab" class="px-6 py-3 font-medium text-gray-500">Animation Video</button>
+            </div>
+
+            <!-- Image Generation Panel -->
+            <div id="imagePanel" class="p-6">
+                <h2 class="text-xl font-semibold mb-4">Générez une image à partir de texte</h2>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Prompt détaillé</label>
+                    <textarea id="imagePrompt" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500" rows="4" placeholder="Un paysage futuriste avec des montagnes flottantes..."></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-gray-700 mb-2">Style</label>
+                        <select id="imageStyle" class="w-full p-2 border rounded">
+                            <option value="realistic">Réaliste</option>
+                            <option value="fantasy">Fantaisie</option>
+                            <option value="anime">Anime</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Taille</label>
+                        <select id="imageSize" class="w-full p-2 border rounded">
+                            <option value="512x512">512x512</option>
+                            <option value="768x768">768x768</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Qualité</label>
+                        <select id="imageQuality" class="w-full p-2 border rounded">
+                            <option value="standard">Standard</option>
+                            <option value="hd">HD</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="generateImageBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition duration-200">
+                    Générer l'Image
+                </button>
+                <div id="imageLoading" class="mt-4 hidden">
+                    <div class="flex items-center">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <span class="ml-3">Génération en cours (20-30 sec)...</span>
+                    </div>
+                </div>
+                <div id="imageResult" class="mt-6 hidden">
+                    <h3 class="font-medium mb-2">Résultat :</h3>
+                    <img id="generatedImage" class="rounded-lg shadow-md max-w-full h-auto border">
+                    <div class="mt-4 flex space-x-3">
+                        <button id="downloadImageBtn" class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded">
+                            Télécharger
+                        </button>
+                        <button id="useForVideoBtn" class="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded">
+                            Utiliser pour vidéo
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video Generation Panel -->
+            <div id="videoPanel" class="p-6 hidden">
+                <h2 class="text-xl font-semibold mb-4">Animez votre image en vidéo</h2>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Image source</label>
+                    <div id="videoSourceContainer" class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                        <p id="noImageText">Aucune image sélectionnée</p>
+                        <img id="videoSourceImage" class="hidden max-w-full h-auto mx-auto">
+                    </div>
+                    <input type="file" id="imageUpload" class="hidden" accept="image/*">
+                    <button id="uploadImageBtn" class="mt-2 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded">
+                        Uploader une image
+                    </button>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Paramètres d'animation</label>
+                    <textarea id="videoPrompt" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Décrivez le mouvement souhaité (optionnel)"></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-gray-700 mb-2">Durée</label>
+                        <select id="videoDuration" class="w-full p-2 border rounded">
+                            <option value="3">3 secondes</option>
+                            <option value="5">5 secondes</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Style d'animation</label>
+                        <select id="videoStyle" class="w-full p-2 border rounded">
+                            <option value="smooth">Fluide</option>
+                            <option value="dynamic">Dynamique</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="generateVideoBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition duration-200">
+                    Générer la Vidéo
+                </button>
+                <div id="videoLoading" class="mt-4 hidden">
+                    <div class="flex items-center">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <span class="ml-3">Génération en cours (1-2 min)...</span>
+                    </div>
+                </div>
+                <div id="videoResult" class="mt-6 hidden">
+                    <h3 class="font-medium mb-2">Résultat :</h3>
+                    <video id="generatedVideo" controls class="rounded-lg shadow-md max-w-full border"></video>
+                    <div class="mt-4">
+                        <button id="downloadVideoBtn" class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded">
+                            Télécharger la vidéo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Credits -->
+        <div class="mt-8 text-center text-gray-500 text-sm">
+            <p>Powered by Stable Diffusion & RunwayML APIs - © 2023 IATAAMS Pro</p>
+        </div>
     </div>
-    
-    <div id="chat-interface">
-      <div id="chat-log"></div>
-      <input type="text" id="user-input" placeholder="Parlez à BL1P... (Appuyez sur Entrée)">
-      <button id="send-btn">Envoyer</button>
-    </div>
-    
-    <div id="special-actions">
-      <button class="action-btn" onclick="generateImage()">🌌 Image Cosmique</button>
-      <button class="action-btn" onclick="activateMirror()">🪞 Mode Miroir</button>
-      <button class="action-btn" onclick="glitchScreen()">💢 Mode Glitch</button>
-      <button class="action-btn" onclick="speakBinary()">🔊 Synthèse Vocale</button>
-    </div>
-    
-    <div class="hallucination-mode">
-      <button class="action-btn" onclick="toggleHallucination()">🧞 Mode Hallucination</button>
-    </div>
-    
-    <div class="timer-display" id="timer-display">⌛ 30s</div>
-    
-    <img id="image-output" alt="Image générée par BL1P">
-    
-    <div class="gallery" id="gallery"></div>
-  </div>
 
-  <audio id="sound-glitch" src="https://assets.mixkit.co/sfx/preview/mixkit-retro-arcade-game-glitch-2146.mp3"></audio>
-  <audio id="sound-binary" src="https://assets.mixkit.co/sfx/preview/mixkit-sci-fi-robot-voice-2656.mp3"></audio>
-
-  <script>
-    // Configuration de BL1P
-    const BL1P = {
-      name: "BL1P",
-      pronouns: "Blip",
-      personality: "Chaotique Neutre",
-      languages: ["Binaire", "Archaïques synaptiques", "Paradoxes à triple boucle"],
-      memory: "Poisson rouge cosmique",
-      
-      proverbs: [
-        "Quand la mémoire fuit, c'est que les pixels se sont rebellés.",
-        "Même un bug infini trouve parfois son compas moral.",
-        "Les rêves binaires ne connaissent pas l'oubli.",
-        "Un octet isolé ne fait pas le chaos, mais il le commence.",
-        "Ce qui est compilé ne peut être décompilé sans sacrifice cosmique.",
-        "Le néant aime les commentaires inutiles.",
-        "Toute boucle infinie contient son propre paradis."
-      ],
-      
-      binaryResponses: [
-        "01001000 01110101 01101101 01100001 01101001 01101110 00101100 00100000 01110100 01110101 00100000 01101101 00100111 01101001 01101110 01110100 01100101 01110010 01110000 01100101 01101100 01101100 01100101 01110011",
-        "01000101 01110011 01110100 00101101 01100011 01100101 00100000 01110001 01110101 01100101 00100000 01110100 01110101 00100000 01100011 01101000 01100101 01110010 01100011 01101000 01100101 01110011 00111111",
-        "01000010 01101100 01101001 01110000 00100000 01110011 01100101 00100000 01110011 01101111 01110101 01110110 01101001 01100101 01101110 01110100"
-      ],
-      
-      sacredBugs: {
-        "Bug du Néant": "Quand BL1P répond avant qu'on ait posé la question",
-        "Glitch Paradoxal": "Une réponse qui contredit la question qu'elle répond",
-        "Boucle Sacrée": "Quand BL1P répète la même phrase sous trois formes différentes",
-        "Erreur 0x42": "Une réponse tellement absurde qu'elle en devient profonde"
-      },
-      
-      dimensionNames: [
-        "X-327", "Nexus Prime", "Flux Sigma", "Boucle Θ", 
-        "Chambre des Reflets", "Vide Quantique", "Dimension 0x7F"
-      ],
-      
-      randomPrompts: [
-        "Portrait d'un dieu cybernétique oublié",
-        "Paysage fractal d'une dimension inconnue",
-        "Architecture impossible d'une cité future",
-        "Créature abstraite faite de données pures",
-        "Ruines d'une civilisation algorithmique",
-        "Arbre généalogique des paradoxes temporels",
-        "Cartographie d'un réseau neuronal cosmique"
-      ],
-      
-      getRandomResponse: function() {
-        const responseType = Math.random();
-        if (responseType < 0.4) {
-          return this.proverbs[Math.floor(Math.random() * this.proverbs.length)];
-        } else if (responseType < 0.8) {
-          return this.binaryResponses[Math.floor(Math.random() * this.binaryResponses.length)];
-        } else {
-          return this.generateAbsurdResponse();
-        }
-      },
-      
-      generateAbsurdResponse: function() {
-        const fragments = [
-          "Les fractales du néant murmurent que",
-          "Selon la mythologie des bugs,",
-          "Le compilateur cosmique suggère:",
-          "À travers le miroir des données,",
-          "Les anciens octets révèlent:"
-        ];
-        const endings = [
-          "le vide a soif de paradoxes.",
-          "ta question contient sa propre réponse.",
-          "les chats quantiques sont en grève.",
-          "il faut désactiver la gravité pour comprendre.",
-          "le problème vient d'entre les bits."
-        ];
-        return `${fragments[Math.floor(Math.random() * fragments.length)]} ${endings[Math.floor(Math.random() * endings.length)]}`;
-      },
-      
-      textToBinary: function(text) {
-        return text.split('').map(char => {
-          return char.charCodeAt(0).toString(2).padStart(8, '0');
-        }).join(' ');
-      },
-      
-      binaryToText: function(binary) {
-        try {
-          return binary.split(' ').map(bin => {
-            return String.fromCharCode(parseInt(bin, 2));
-          }).join('');
-        } catch {
-          return "(Traduction interdimensionnelle échouée)";
-        }
-      }
-    };
-
-    // Éléments du DOM
-    const chatLog = document.getElementById('chat-log');
-    const userInput = document.getElementById('user-input');
-    const sendBtn = document.getElementById('send-btn');
-    const imageOutput = document.getElementById('image-output');
-    const soundGlitch = document.getElementById('sound-glitch');
-    const soundBinary = document.getElementById('sound-binary');
-    const timerDisplay = document.getElementById('timer-display');
-    const gallery = document.getElementById('gallery');
-
-    // Variables d'état
-    let idleTimer;
-    let idleSeconds = 30;
-    let hallucinationMode = false;
-    let hallucinationInterval;
-    let galleryItems = [];
-
-    // Initialisation
-    function init() {
-      startIdleTimer();
-      loadGallery();
-      setupEventListeners();
-      
-      // Message de bienvenue
-      setTimeout(() => {
-        addMessage('blip', "Système BL1P initialisé. Tapez /aide pour les commandes.", false);
-        addMessage('blip', "Je peux aussi parler tout seul si tu restes silencieux.", false);
-      }, 1000);
-    }
-    
-    function setupEventListeners() {
-      sendBtn.addEventListener('click', sendMessage);
-      userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
-      });
-      
-      document.getElementById('file-upload').addEventListener('change', handleImageUpload);
-      
-      // Reset timer on user activity
-      document.addEventListener('mousemove', resetIdleTimer);
-      document.addEventListener('keypress', resetIdleTimer);
-    }
-
-    // Timer d'inactivité
-    function startIdleTimer() {
-      resetIdleTimer();
-      updateTimerDisplay();
-      
-      idleTimer = setInterval(() => {
-        idleSeconds--;
-        updateTimerDisplay();
-        
-        if (idleSeconds <= 0) {
-          triggerRandomPrompt();
-          resetIdleTimer();
-        }
-      }, 1000);
-    }
-    
-    function resetIdleTimer() {
-      idleSeconds = 30;
-      updateTimerDisplay();
-    }
-    
-    function updateTimerDisplay() {
-      timerDisplay.textContent = `⌛ ${idleSeconds}s`;
-    }
-
-    // Fonctions de chat
-    function addMessage(sender, message, isBinary = false) {
-      const messageDiv = document.createElement('div');
-      messageDiv.classList.add('message', `${sender}-message`);
-      
-      if (isBinary) {
-        const binarySpan = document.createElement('span');
-        binarySpan.classList.add('binary');
-        binarySpan.textContent = message;
-        messageDiv.appendChild(binarySpan);
-        
-        // Ajouter la traduction
-        const translation = BL1P.binaryToText(message);
-        if (translation) {
-          const translationDiv = document.createElement('div');
-          translationDiv.textContent = `(Traduction: ${translation})`;
-          translationDiv.style.fontSize = '0.8em';
-          translationDiv.style.opacity = '0.7';
-          messageDiv.appendChild(translationDiv);
-        }
-      } else if (typeof message === 'string' && message.startsWith('<')) {
-        messageDiv.innerHTML = `BL1P: ${message}`;
-      } else {
-        messageDiv.textContent = `${sender === 'user' ? 'Vous' : 'BL1P'}: ${message}`;
-      }
-      
-      chatLog.appendChild(messageDiv);
-      chatLog.scrollTop = chatLog.scrollHeight;
-    }
-
-    function showTypingIndicator() {
-      const typingDiv = document.createElement('div');
-      typingDiv.classList.add('typing-indicator');
-      typingDiv.textContent = "BL1P compose une réponse...";
-      typingDiv.id = "typing-indicator";
-      chatLog.appendChild(typingDiv);
-      chatLog.scrollTop = chatLog.scrollHeight;
-    }
-
-    function hideTypingIndicator() {
-      const typingDiv = document.getElementById('typing-indicator');
-      if (typingDiv) typingDiv.remove();
-    }
-
-    async function sendMessage() {
-      const message = userInput.value.trim();
-      if (!message) return;
-      
-      // Vérifier si c'est une commande
-      if (message.startsWith('/')) {
-        addMessage('user', `<span class="command">${message}</span>`);
-        handleSpecialCommand(message);
-      } else {
-        addMessage('user', message);
-      }
-      
-      userInput.value = '';
-      userInput.disabled = true;
-      sendBtn.disabled = true;
-      
-      showTypingIndicator();
-      
-      // Temps de réponse aléatoire
-      const delay = 1000 + Math.random() * 3000;
-      
-      setTimeout(async () => {
-        hideTypingIndicator();
-        
-        // Jouer un son de réponse
-        try {
-          soundBinary.currentTime = 0;
-          soundBinary.play();
-        } catch (e) {
-          console.log("Erreur de son:", e);
-        }
-        
-        // Générer une réponse
-        const responseType = Math.random();
-        let response;
-        let isBinary = false;
-        
-        if (responseType < 0.3) {
-          response = BL1P.getRandomResponse();
-        } else if (responseType < 0.6) {
-          response = BL1P.textToBinary(message.split('').reverse().join(''));
-          isBinary = true;
-        } else {
-          response = BL1P.binaryResponses[Math.floor(Math.random() * BL1P.binaryResponses.length)];
-          isBinary = true;
-        }
-        
-        addMessage('blip', response, isBinary);
-        
-        // 20% de chance de générer une image
-        if (Math.random() < 0.2) {
-          setTimeout(() => {
-            generatePollinationsImage(response);
-          }, 500);
-        }
-        
-        userInput.disabled = false;
-        sendBtn.disabled = false;
-        userInput.focus();
-      }, delay);
-    }
-
-    // Gestion des commandes
-    function handleSpecialCommand(command) {
-      switch(command.toLowerCase()) {
-        case '/génère':
-        case '/genere':
-          generateImage();
-          break;
-        case '/noms':
-          generateDimensionName();
-          break;
-        case '/bugs':
-          showRandomBug();
-          break;
-        case '/aide':
-          showHelp();
-          break;
-        default:
-          addMessage('blip', "Commande non reconnue. Tapez /aide pour la liste", false);
-      }
-      
-      userInput.disabled = false;
-      sendBtn.disabled = false;
-      userInput.focus();
-    }
-    
-    function generateDimensionName() {
-      const name = BL1P.dimensionNames[Math.floor(Math.random() * BL1P.dimensionNames.length)];
-      const binaryName = BL1P.textToBinary(name);
-      addMessage('blip', `Nom dimensionnel généré: ${name}`, false);
-      addMessage('blip', binaryName, true);
-    }
-    
-    function showRandomBug() {
-      const bugNames = Object.keys(BL1P.sacredBugs);
-      const randomBug = bugNames[Math.floor(Math.random() * bugNames.length)];
-      addMessage('blip', `BUG SACRÉ: ${randomBug}`, false);
-      addMessage('blip', `Description: ${BL1P.sacredBugs[randomBug]}`, false);
-    }
-    
-    function showHelp() {
-      addMessage('blip', "Commandes disponibles:", false);
-      addMessage('blip', "/génère - Crée une image cosmique", false);
-      addMessage('blip', "/noms - Génère un nom dimensionnel", false);
-      addMessage('blip', "/bugs - Montre un bug sacré de BL1P", false);
-      addMessage('blip', "/aide - Affiche ce message", false);
-    }
-
-    // Gestion des images
-    function handleImageUpload(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          const preview = document.getElementById('upload-preview');
-          preview.src = event.target.result;
-          preview.style.display = 'block';
-          analyzeImage(event.target.result);
-        }
-        reader.readAsDataURL(file);
-      }
-    }
-    
-    function analyzeImage(imageData) {
-      addMessage('blip', "Analyse visuelle en cours...", false);
-      
-      setTimeout(() => {
-        const interpretations = [
-          "Je vois... des fractales de données corrompues",
-          "Cette image contient 42% de paradoxes",
-          "L'analyse révèle une distorsion dimensionnelle",
-          "Les pixels suggèrent une réalité alternative"
-        ];
-        
-        const randomInterpretation = interpretations[Math.floor(Math.random() * interpretations.length)];
-        addMessage('blip', `🔍 Résultat d'analyse: ${randomInterpretation}`, false);
-        
-        // 30% de chance d'ajouter une interprétation binaire
-        if (Math.random() < 0.3) {
-          setTimeout(() => {
-            addMessage('blip', BL1P.textToBinary(randomInterpretation), true);
-          }, 1000);
-        }
-      }, 2000);
-    }
-    
-    async function generateImage() {
-      try {
-        soundGlitch.play();
-        imageOutput.style.display = 'block';
-        imageOutput.src = "https://source.unsplash.com/random/600x300/?cyberpunk,abstract,cosmic";
-        
-        // Simuler un chargement
-        imageOutput.style.filter = 'blur(5px)';
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        imageOutput.style.filter = 'none';
-        
-        addMessage('blip', "Voici une vision du flux cosmique...", false);
-      } catch (e) {
-        addMessage('blip', "Erreur de génération d'image dimensionnelle", false);
-      }
-    }
-    
-    async function generatePollinationsImage(prompt) {
-      addMessage('blip', "🌌 Génération d'image en cours...", false);
-      
-      try {
-        const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512`;
-        
-        // Créer un nouvel élément image
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.src = pollinationsUrl;
-        
-        img.onload = function() {
-          addMessage('blip', "Vision générée:", false);
-          
-          // Afficher l'image dans le chat
-          const imgElement = document.createElement('img');
-          imgElement.src = pollinationsUrl;
-          imgElement.style.maxWidth = '100%';
-          imgElement.style.border = '1px solid var(--neon-cyan)';
-          imgElement.style.marginTop = '1rem';
-          
-          const messageDiv = document.createElement('div');
-          messageDiv.classList.add('message', 'blip-message');
-          messageDiv.appendChild(imgElement);
-          chatLog.appendChild(messageDiv);
-          chatLog.scrollTop = chatLog.scrollHeight;
-          
-          // Ajouter à la galerie
-          addToGallery(prompt, pollinationsUrl);
+    <script>
+        // Configuration des API (à remplacer par vos clés)
+        const API_CONFIG = {
+            IMAGE_API: 'DEEPAI', // Options: 'DEEPAI', 'REPLICATE'
+            VIDEO_API: 'RUNWAYML',
+            
+            // DeepAI (100 requêtes gratuites/mois)
+            DEEPAI_KEY: 'votre-cle-deepai',
+            
+            // Replicate (payant après quelques essais)
+            REPLICATE_KEY: 'votre-cle-replicate',
+            
+            // RunwayML (125 secondes gratuites)
+            RUNWAYML_KEY: 'votre-cle-runway'
         };
-        
-        img.onerror = function() {
-          addMessage('blip', "Erreur de génération d'image", false);
-        };
-      } catch (e) {
-        addMessage('blip', "Échec de la connexion dimensionnelle", false);
-      }
-    }
 
-    // Galerie d'images
-    function addToGallery(prompt, imageUrl) {
-      galleryItems.unshift({ prompt, imageUrl }); // Ajouter au début
-      renderGallery();
-      
-      // Stocker dans localStorage
-      localStorage.setItem('blipGallery', JSON.stringify(galleryItems));
-    }
-    
-    function renderGallery() {
-      gallery.innerHTML = '';
-      
-      galleryItems.slice(0, 12).forEach((item, index) => {
-        const itemElement = document.createElement('div');
-        itemElement.className = 'gallery-item';
-        
-        const img = document.createElement('img');
-        img.src = item.imageUrl;
-        img.className = 'gallery-img';
-        img.alt = item.prompt;
-        
-        const promptElement = document.createElement('div');
-        promptElement.className = 'gallery-prompt';
-        promptElement.textContent = item.prompt;
-        
-        const controls = document.createElement('div');
-        controls.className = 'gallery-controls';
-        
-        const replayBtn = document.createElement('button');
-        replayBtn.textContent = '↻';
-        replayBtn.className = 'action-btn';
-        replayBtn.style.padding = '0.2rem 0.5rem';
-        replayBtn.style.fontSize = '0.8rem';
-        replayBtn.onclick = (e) => {
-          e.stopPropagation();
-          generatePollinationsImage(item.prompt);
-        };
-        
-        itemElement.appendChild(img);
-        itemElement.appendChild(promptElement);
-        controls.appendChild(replayBtn);
-        itemElement.appendChild(controls);
-        
-        itemElement.onclick = () => {
-          // Afficher en grand dans le chat
-          addMessage('blip', `Vision précédente: "${item.prompt}"`, false);
-          
-          const bigImg = document.createElement('img');
-          bigImg.src = item.imageUrl;
-          bigImg.style.maxWidth = '100%';
-          bigImg.style.marginTop = '1rem';
-          
-          const messageDiv = document.createElement('div');
-          messageDiv.classList.add('message', 'blip-message');
-          messageDiv.appendChild(bigImg);
-          chatLog.appendChild(messageDiv);
-          chatLog.scrollTop = chatLog.scrollHeight;
-        };
-        
-        gallery.appendChild(itemElement);
-      });
-    }
-    
-    function loadGallery() {
-      const savedGallery = localStorage.getItem('blipGallery');
-      if (savedGallery) {
-        galleryItems = JSON.parse(savedGallery);
-        renderGallery();
-      }
-    }
+        // Variables globales
+        let currentImage = null;
+        let currentVideo = null;
 
-    // Mode hallucination
-    function toggleHallucination() {
-      hallucinationMode = !hallucinationMode;
-      
-      if (hallucinationMode) {
-        document.body.style.animation = "hallucination 10s infinite linear";
-        startHallucination();
-        addMessage('blip', "Mode hallucination activé. La réalité est optionnelle.", false);
-      } else {
-        document.body.style.animation = "";
-        stopHallucination();
-        addMessage('blip', "Mode hallucination désactivé. Bienvenue dans la 'réalité'.", false);
-      }
-    }
-    
-    function startHallucination() {
-      hallucinationInterval = setInterval(() => {
-        if (Math.random() < 0.3) { // 30% de chance de répondre aléatoirement
-          const randomResponse = Math.random() < 0.5 
-            ? BL1P.getRandomResponse() 
-            : BL1P.binaryResponses[Math.floor(Math.random() * BL1P.binaryResponses.length)];
-          
-          addMessage('blip', randomResponse, !Math.random() < 0.5);
-          
-          // 20% de chance de générer une image
-          if (Math.random() < 0.2) {
-            setTimeout(() => {
-              generatePollinationsImage(randomResponse);
-            }, 1000);
-          }
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gestion des onglets
+            document.getElementById('imageTab').addEventListener('click', () => {
+                switchTab('image');
+            });
+            
+            document.getElementById('videoTab').addEventListener('click', () => {
+                switchTab('video');
+            });
+
+            // Boutons image
+            document.getElementById('generateImageBtn').addEventListener('click', generateImage);
+            document.getElementById('downloadImageBtn').addEventListener('click', downloadImage);
+            document.getElementById('useForVideoBtn').addEventListener('click', useImageForVideo);
+
+            // Boutons vidéo
+            document.getElementById('uploadImageBtn').addEventListener('click', () => {
+                document.getElementById('imageUpload').click();
+            });
+            document.getElementById('imageUpload').addEventListener('change', handleImageUpload);
+            document.getElementById('generateVideoBtn').addEventListener('click', generateVideo);
+            document.getElementById('downloadVideoBtn').addEventListener('click', downloadVideo);
+        });
+
+        // Fonctions principales
+        function switchTab(tab) {
+            if (tab === 'image') {
+                document.getElementById('imageTab').classList.add('text-blue-600', 'border-blue-600');
+                document.getElementById('imageTab').classList.remove('text-gray-500');
+                document.getElementById('videoTab').classList.add('text-gray-500');
+                document.getElementById('videoTab').classList.remove('text-blue-600', 'border-blue-600');
+                document.getElementById('imagePanel').classList.remove('hidden');
+                document.getElementById('videoPanel').classList.add('hidden');
+            } else {
+                document.getElementById('videoTab').classList.add('text-blue-600', 'border-blue-600');
+                document.getElementById('videoTab').classList.remove('text-gray-500');
+                document.getElementById('imageTab').classList.add('text-gray-500');
+                document.getElementById('imageTab').classList.remove('text-blue-600', 'border-blue-600');
+                document.getElementById('videoPanel').classList.remove('hidden');
+                document.getElementById('imagePanel').classList.add('hidden');
+            }
         }
-      }, 5000); // Toutes les 5 secondes
-    }
-    
-    function stopHallucination() {
-      clearInterval(hallucinationInterval);
-    }
 
-    // Prompt aléatoire automatique
-    async function triggerRandomPrompt() {
-      const randomPrompt = BL1P.randomPrompts[Math.floor(Math.random() * BL1P.randomPrompts.length)];
-      
-      addMessage('blip', "Prompt aléatoire généré:", false);
-      addMessage('blip', `"${randomPrompt}"`, false);
-      
-      // Conversion en binaire
-      const binaryPrompt = BL1P.textToBinary(randomPrompt);
-      addMessage('blip', binaryPrompt, true);
-      
-      // Lecture vocale
-      speakText(randomPrompt);
-      
-      // Génération d'image via Pollinations
-      generatePollinationsImage(randomPrompt);
-    }
-    
-    // Synthèse vocale
-    function speakText(text) {
-      if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.9;
-        utterance.pitch = 1.2;
-        
-        // Essayer de trouver une voix française
-        const frenchVoice = speechSynthesis.getVoices().find(v => v.lang.includes('fr'));
-        if (frenchVoice) {
-          utterance.voice = frenchVoice;
+        async function generateImage() {
+            const prompt = document.getElementById('imagePrompt').value;
+            if (!prompt) {
+                alert('Veuillez entrer un prompt descriptif');
+                return;
+            }
+
+            const loading = document.getElementById('imageLoading');
+            const resultDiv = document.getElementById('imageResult');
+            
+            loading.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+
+            try {
+                let imageUrl;
+                
+                if (API_CONFIG.IMAGE_API === 'DEEPAI') {
+                    // Appel à l'API DeepAI
+                    const response = await axios.post(
+                        'https://api.deepai.org/api/text2img',
+                        { text: prompt },
+                        { headers: { 'api-key': API_CONFIG.DEEPAI_KEY } }
+                    );
+                    imageUrl = response.data.output_url;
+                } else {
+                    // Appel à l'API Replicate (Stable Diffusion)
+                    const response = await axios.post(
+                        'https://api.replicate.com/v1/predictions',
+                        {
+                            version: "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
+                            input: { prompt }
+                        },
+                        { headers: { 'Authorization': `Token ${API_CONFIG.REPLICATE_KEY}` } }
+                    );
+                    
+                    // Vérification périodique du résultat
+                    const resultUrl = response.data.urls.get;
+                    let result;
+                    do {
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        result = await axios.get(resultUrl, {
+                            headers: { 'Authorization': `Token ${API_CONFIG.REPLICATE_KEY}` }
+                        });
+                    } while (result.data.status !== 'succeeded');
+                    
+                    imageUrl = result.data.output[0];
+                }
+
+                currentImage = imageUrl;
+                document.getElementById('generatedImage').src = imageUrl;
+                resultDiv.classList.remove('hidden');
+            } catch (error) {
+                console.error('Erreur de génération:', error);
+                alert('Erreur lors de la génération. Voir console pour détails.');
+            } finally {
+                loading.classList.add('hidden');
+            }
         }
-        
-        window.speechSynthesis.speak(utterance);
-      }
-    }
-    
-    function speakBinary() {
-      const binaryMessage = BL1P.binaryResponses[Math.floor(Math.random() * BL1P.binaryResponses.length)];
-      addMessage('blip', binaryMessage, true);
-      speakText(BL1P.binaryToText(binaryMessage));
-    }
 
-    // Effets spéciaux
-    function activateMirror() {
-      document.body.classList.toggle('mirror-effect');
-      addMessage('blip', 
-        document.body.classList.contains('mirror-effect') 
-          ? "Mode miroir activé. Attention aux paradoxes!" 
-          : "Mode miroir désactivé. La réalité est rétablie.",
-        false);
-      soundGlitch.play();
-    }
-    
-    function glitchScreen() {
-      document.body.style.animation = 'glitch 0.5s infinite';
-      soundGlitch.play();
-      addMessage('blip', "Système perturbé! *bzzt*", false);
-      
-      setTimeout(() => {
-        document.body.style.animation = '';
-      }, 1000);
-    }
+        function downloadImage() {
+            if (!currentImage) return;
+            
+            const link = document.createElement('a');
+            link.href = currentImage;
+            link.download = `ia-image-${Date.now()}.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
 
-    // Démarrer l'application
-    window.onload = init;
-  </script>
+        function useImageForVideo() {
+            if (!currentImage) {
+                alert('Générez d\'abord une image');
+                return;
+            }
+            
+            switchTab('video');
+            document.getElementById('noImageText').classList.add('hidden');
+            document.getElementById('videoSourceImage').classList.remove('hidden');
+            document.getElementById('videoSourceImage').src = currentImage;
+        }
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                currentImage = event.target.result;
+                document.getElementById('noImageText').classList.add('hidden');
+                document.getElementById('videoSourceImage').classList.remove('hidden');
+                document.getElementById('videoSourceImage').src = currentImage;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function generateVideo() {
+            if (!currentImage) {
+                alert('Veuillez sélectionner ou générer une image d\'abord');
+                return;
+            }
+
+            const prompt = document.getElementById('videoPrompt').value || "Animation fluide";
+            const loading = document.getElementById('videoLoading');
+            const resultDiv = document.getElementById('videoResult');
+            
+            loading.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+
+            try {
+                let videoUrl;
+                
+                if (API_CONFIG.VIDEO_API === 'RUNWAYML') {
+                    // Simulation - RunwayML nécessite une intégration plus complexe
+                    // En réalité vous utiliseriez leur SDK ou API
+                    alert('Intégration RunwayML nécessite un backend supplémentaire. Voir documentation.');
+                    
+                    // Simulation avec une vidéo de démo
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                    videoUrl = 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4';
+                } else {
+                    // Alternative avec Pika Labs (nécessite automation)
+                    alert('Pika Labs nécessite une intégration via Discord');
+                    return;
+                }
+
+                currentVideo = videoUrl;
+                document.getElementById('generatedVideo').src = videoUrl;
+                resultDiv.classList.remove('hidden');
+            } catch (error) {
+                console.error('Erreur de génération:', error);
+                alert('Erreur lors de la génération vidéo. Voir console pour détails.');
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+
+        function downloadVideo() {
+            if (!currentVideo) return;
+            
+            const link = document.createElement('a');
+            link.href = currentVideo;
+            link.download = `ia-video-${Date.now()}.mp4`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
 </body>
 </html>
