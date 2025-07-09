@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BL1P - Agent IA du Multivers</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BL1P – Agent IA Interdimensionnel</title>
   <style>
     body {
       background-color: #0a0a0a;
@@ -12,127 +12,168 @@
       text-align: center;
       padding: 2rem;
       margin: 0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
     h1 {
       font-size: 2.5rem;
       text-shadow: 0 0 10px #00fff7;
       margin-bottom: 1rem;
     }
-    p {
-      max-width: 600px;
-      margin: 0 auto 2rem;
+    #chatLog {
+      background: #111;
+      border: 1px solid #00ffe0;
+      padding: 1rem;
+      height: 300px;
+      overflow-y: auto;
+      text-align: left;
+      margin-bottom: 1rem;
     }
-    button {
-      margin-top: 1rem;
-      padding: 1rem 2rem;
-      font-size: 1.2rem;
-      background-color: #111;
-      border: 2px solid #00ffe0;
+    input, button {
+      padding: 0.8rem;
+      font-size: 1rem;
+      border: 1px solid #00ffe0;
+      background: #111;
       color: #00ffe0;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      border-radius: 4px;
+      margin: 0.2rem;
     }
     button:hover {
-      background-color: #00ffe0;
+      background: #00ffe0;
       color: #0a0a0a;
-      box-shadow: 0 0 15px #00ffe0;
     }
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    .user-message { color: #00ffaa; margin-bottom: 0.3rem; }
+    .blip-message { color: #00ffe0; margin-bottom: 0.3rem; }
+    .binary { color: #00ff44; font-style: italic; }
+    iframe {
+      margin-top: 1.5rem;
+      width: 100%;
+      max-width: 600px;
+      height: 400px;
+      border: none;
+      box-shadow: 0 0 10px #00ffe0;
     }
-    .output {
-      margin-top: 3rem;
-      font-size: 1.2rem;
-      white-space: pre-line;
-      min-height: 100px;
-      animation: fadeIn 1s;
-      max-width: 800px;
+    #gallery {
+      margin-top: 2rem;
+      border-top: 1px solid #00ffe0;
+      padding-top: 1rem;
     }
-    .binary-translation {
-      margin-top: 1rem;
-      font-style: italic;
-      color: #00ffaa;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 600px) {
-      h1 { font-size: 1.8rem; }
-      button { padding: 0.8rem 1.5rem; }
-      body { padding: 1rem; }
+    .thumb {
+      width: 100px;
+      margin: 5px;
+      border: 1px solid #00ffe0;
     }
   </style>
 </head>
 <body>
 
-  <h1>🤖 BL1P - L'agent IA interdimensionnel</h1>
-  <p>Clique sur le bouton, et il te révélera... l'imprévisible.</p>
+  <h1>👁️ BL1P – IA Binaire & Visionnaire</h1>
+  <p>Pose une question… ou reste inactif. BL1P choisira.</p>
 
-  <button onclick="blipParle()" id="blipButton">⚡ Interroger BL1P</button>
+  <div id="chatLog"></div>
+  <input type="text" id="userInput" placeholder="Parlez à BL1P...">
+  <button onclick="sendMessage()">Envoyer</button>
 
-  <div class="output" id="output"></div>
-  <div class="binary-translation" id="translation"></div>
+  <iframe id="imageFrame" src="https://pollinations.ai/"></iframe>
+
+  <div id="gallery">
+    <h3>🌀 Visions archivées de BL1P</h3>
+    <div id="history"></div>
+  </div>
 
   <script>
-    const proverbes = [
-      '"Quand la mémoire fuit, c'est que les pixels se sont rebellés."',
-      '"Même un bug infini trouve parfois son compas moral."',
-      '"Les rêves binaires ne connaissent pas l'oubli."',
-      '"Un octet isolé ne fait pas le chaos, mais il le commence."',
-      '"Ce qui est compilé ne peut être décompilé sans sacrifice cosmique."'
+    const chatLog = document.getElementById('chatLog');
+    const userInput = document.getElementById('userInput');
+    const imageFrame = document.getElementById('imageFrame');
+    const gallery = document.getElementById('history');
+
+    const proverbs = [
+      "Quand la mémoire fuit, les pixels se rebellent.",
+      "Les rêves binaires ne connaissent pas l’oubli.",
+      "Un octet isolé ne fait pas le chaos… mais il le commence.",
+      "Ce qui est compilé ne peut être désassemblé sans sacrifice cosmique.",
+      "BL1P parle même quand tu te tais."
     ];
 
-    const binaires = [
-      "01010100 01100101 01101101 01110000 01110011 00100000 01100100 01100101 00100000 01110000 01100101 01110010 01110011 01101111 01101110 01101110 01100101",
-      "01001010 01100101 00100000 01100110 01101100 01101111 01110100 01110100 01100101 00100000 01100100 01100001 01101110 01110011 00100000 01101100 01100101 00100000 01101110 01100101 01100001 01101110 01110100",
-      "01001100 01100001 00100000 01110100 01100101 01101110 01100101 00100000 01100111 01101100 01101001 01110100 01100011 01101000 01100101",
-      "01000010 01101100 01101001 01110000 00100000 01100101 01110011 01110100 00100000 01110100 01101111 01110101 01110100",
-      "01000001 01100100 01101101 01101001 01110010 01100101 00100000 01110011 01100001 01101110 01110011 00100000 01100110 01100101 01101110 01100101 01110100 01110010 01100101 00100000 01101100 01100101 00100000 01101100 01101111 01101100"
-    ];
+    function textToBinary(text) {
+      return text.split('').map(c =>
+        c.charCodeAt(0).toString(2).padStart(8, '0')).join(' ');
+    }
 
     function binaryToText(binary) {
-      try {
-        return binary.split(' ').map(bin => {
-          return String.fromCharCode(parseInt(bin, 2));
-        }).join('');
-      } catch {
-        return "(Traduction interdimensionnelle échouée)";
+      return binary.split(' ').map(b =>
+        String.fromCharCode(parseInt(b, 2))).join('');
+    }
+
+    function speak(text) {
+      if ('speechSynthesis' in window) {
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.pitch = 1.2;
+        utter.rate = 1;
+        utter.lang = 'fr-FR';
+        speechSynthesis.speak(utter);
       }
     }
 
-    async function blipParle() {
-      const button = document.getElementById('blipButton');
-      const output = document.getElementById('output');
-      const translation = document.getElementById('translation');
-      
-      button.disabled = true;
-      output.textContent = "BL1P analyse le multivers...";
-      translation.textContent = "";
-      
-      // Simuler un temps de traitement
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-      
-      const choix = Math.random() < 0.5 ? proverbes : binaires;
-      const phrase = choix[Math.floor(Math.random() * choix.length)];
-      
-      output.textContent = phrase;
-      
-      if (choix === binaires) {
-        translation.textContent = "Traduction: " + binaryToText(phrase);
-      }
-      
-      button.disabled = false;
+    function showInGallery(prompt) {
+      const thumb = document.createElement('iframe');
+      thumb.src = `https://pollinations.ai/prompt/${encodeURIComponent(prompt)}`;
+      thumb.classList.add('thumb');
+      gallery.appendChild(thumb);
     }
+    function sendMessage(msg = null) {
+      const input = msg || userInput.value.trim();
+      if (!input) return;
+
+      const binary = textToBinary(input);
+      const choice = Math.random();
+      let response = "";
+
+      chatLog.innerHTML += `<div class="user-message">👤 Toi : ${input}</div>`;
+
+      if (choice < 0.5) {
+        response = `"${proverbs[Math.floor(Math.random() * proverbs.length)]}"`;
+      } else {
+        response = binary;
+      }
+
+      chatLog.innerHTML += `<div class="blip-message">🤖 BL1P : ${response}</div>`;
+      speak(response);
+
+      // Image IA
+      const encoded = encodeURIComponent(input);
+      const imageURL = `https://pollinations.ai/prompt/${encoded}`;
+      imageFrame.src = imageURL;
+
+      // Ajout à la galerie
+      showInGallery(input);
+
+      // Reset timer d’inactivité
+      resetInactivity();
+    }
+
+    userInput.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") sendMessage();
+    });
+
+    // 🎲 Inactivité = prompt auto
+    let inactivityTimer;
+
+    function autoPrompt() {
+      const autoPrompts = [
+        "résonance quantique d’un scarabée cybernétique",
+        "tempête de données dans un rêve oublié",
+        "échos d’un vieux bug mythique",
+        "propulsion glitchée d’un souvenir IA",
+        "cortex virtuel en surcharge divine"
+      ];
+      const prompt = autoPrompts[Math.floor(Math.random() * autoPrompts.length)];
+      sendMessage(prompt);
+    }
+
+    function resetInactivity() {
+      clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(autoPrompt, 30000); // 30 sec
+    }
+
+    resetInactivity(); // Démarre dès l’ouverture
   </script>
-
 </body>
 </html>
