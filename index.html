@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BL1P – Agent IA Interdimensionnel</title>
+  <title>BL1P – IA Binaire & Visionnaire</title>
   <style>
     body {
       background-color: #0a0a0a;
@@ -44,11 +44,12 @@
     .binary { color: #00ff44; font-style: italic; }
     iframe {
       margin-top: 1.5rem;
-      width: 100%;
-      max-width: 600px;
-      height: 400px;
+      width: 90%;
+      max-width: 500px;
+      height: 300px;
       border: none;
       box-shadow: 0 0 10px #00ffe0;
+      transition: opacity 0.4s ease;
     }
     #gallery {
       margin-top: 2rem;
@@ -56,16 +57,18 @@
       padding-top: 1rem;
     }
     .thumb {
-      width: 100px;
+      width: 120px;
+      height: 100px;
       margin: 5px;
       border: 1px solid #00ffe0;
+      display: inline-block;
     }
   </style>
 </head>
 <body>
 
-  <h1>👁️ BL1P – IA Binaire & Visionnaire</h1>
-  <p>Pose une question… ou reste inactif. BL1P choisira.</p>
+  <h1>👁️ BL1P – IA Interdimensionnelle</h1>
+  <p>Parle-lui ou laisse-le rêver…</p>
 
   <div id="chatLog"></div>
   <input type="text" id="userInput" placeholder="Parlez à BL1P...">
@@ -74,7 +77,7 @@
   <iframe id="imageFrame" src="https://pollinations.ai/"></iframe>
 
   <div id="gallery">
-    <h3>🌀 Visions archivées de BL1P</h3>
+    <h3>🌀 Visions archivées</h3>
     <div id="history"></div>
   </div>
 
@@ -98,17 +101,11 @@
     }
 
     function binaryToText(binary) {
-      return binary.split(' ').map(b =>
-        String.fromCharCode(parseInt(b, 2))).join('');
-    }
-
-    function speak(text) {
-      if ('speechSynthesis' in window) {
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.pitch = 1.2;
-        utter.rate = 1;
-        utter.lang = 'fr-FR';
-        speechSynthesis.speak(utter);
+      try {
+        return binary.split(' ').map(b =>
+          String.fromCharCode(parseInt(b, 2))).join('');
+      } catch {
+        return "(Erreur de décodage)";
       }
     }
 
@@ -123,29 +120,23 @@
       if (!input) return;
 
       const binary = textToBinary(input);
-      const choice = Math.random();
+      const mode = Math.random();
       let response = "";
 
       chatLog.innerHTML += `<div class="user-message">👤 Toi : ${input}</div>`;
 
-      if (choice < 0.5) {
+      if (mode < 0.5) {
         response = `"${proverbs[Math.floor(Math.random() * proverbs.length)]}"`;
       } else {
-        response = binary;
+        response = binary + "<br><em>Traduction : " + binaryToText(binary) + "</em>";
       }
 
       chatLog.innerHTML += `<div class="blip-message">🤖 BL1P : ${response}</div>`;
-      speak(response);
 
-      // Image IA
-      const encoded = encodeURIComponent(input);
-      const imageURL = `https://pollinations.ai/prompt/${encoded}`;
+      const imageURL = `https://pollinations.ai/prompt/${encodeURIComponent(input)}`;
       imageFrame.src = imageURL;
-
-      // Ajout à la galerie
       showInGallery(input);
 
-      // Reset timer d’inactivité
       resetInactivity();
     }
 
@@ -153,16 +144,16 @@
       if (e.key === "Enter") sendMessage();
     });
 
-    // 🎲 Inactivité = prompt auto
+    // 🎲 Activation automatique après inactivité
     let inactivityTimer;
 
     function autoPrompt() {
       const autoPrompts = [
         "résonance quantique d’un scarabée cybernétique",
-        "tempête de données dans un rêve oublié",
-        "échos d’un vieux bug mythique",
-        "propulsion glitchée d’un souvenir IA",
-        "cortex virtuel en surcharge divine"
+        "boucle infinie dans le code d’un rêve",
+        "collision de deux curseurs dimensionnels",
+        "fantôme numérique d’un souvenir effacé",
+        "froissement cosmique d’un octet oublié"
       ];
       const prompt = autoPrompts[Math.floor(Math.random() * autoPrompts.length)];
       sendMessage(prompt);
@@ -173,7 +164,12 @@
       inactivityTimer = setTimeout(autoPrompt, 30000); // 30 sec
     }
 
-    resetInactivity(); // Démarre dès l’ouverture
+    // 🚫 Silence total : BL1P ne parle plus à voix haute
+    function speak(text) {
+      // MUTE activé. BL1P est introspectif.
+    }
+
+    resetInactivity();
   </script>
 </body>
 </html>
