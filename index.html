@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Vidful Clone</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #eee;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+        .panel {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 0 0 5px 5px;
+        }
+        .panel.active {
+            display: block;
+        }
+        textarea, input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #resultContainer {
+            margin-top: 20px;
+        }
+        #generatedImage, #generatedVideo {
+            max-width: 100%;
+            margin-top: 10px;
+        }
+        .loading {
+            display: none;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Générateur IA Image → Vidéo</h1>
+        
+        <div class="tab-container">
+            <div class="tab active" onclick="switchTab('image')">Générer une Image</div>
+            <div class="tab" onclick="switchTab('video')">Créer une Vidéo</div>
+        </div>
+        
+        <!-- Panel Génération Image -->
+        <div id="imagePanel" class="panel active">
+            <h2>Générer une image à partir d'un texte</h2>
+            <textarea id="imagePrompt" rows="4" placeholder="Décrivez l'image que vous voulez générer..."></textarea>
+            <button onclick="generateImage()">Générer l'Image</button>
+            <div class="loading" id="imageLoading">Génération en cours...</div>
+            <div id="imageResultContainer">
+                <img id="generatedImage" style="display: none;">
+            </div>
+        </div>
+        
+        <!-- Panel Génération Vidéo -->
+        <div id="videoPanel" class="panel">
+            <h2>Créer une vidéo à partir d'une image</h2>
+            <input type="file" id="imageUpload" accept="image/*">
+            <textarea id="videoPrompt" rows="2" placeholder="Décrivez l'animation souhaitée (optionnel)"></textarea>
+            <button onclick="generateVideo()">Créer la Vidéo</button>
+            <div class="loading" id="videoLoading">Création de la vidéo en cours...</div>
+            <div id="videoResultContainer">
+                <video id="generatedVideo" controls style="display: none;"></video>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentImageUrl = null;
+        
+        // Basculer entre les onglets
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            
+            document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`${tabName}Panel`).classList.add('active');
+        }
+        
+        // Simuler la génération d'image (remplacer par un vrai appel API)
+        function generateImage() {
+            const prompt = document.getElementById('imagePrompt').value;
+            if (!prompt) {
+                alert('Veuillez entrer une description');
+                return;
+            }
+            
+            const loading = document.getElementById('imageLoading');
+            const resultImg = document.getElementById('generatedImage');
+            
+            loading.style.display = 'block';
+            resultImg.style.display = 'none';
+            
+            // Simulation d'appel API (remplacer par un vrai appel)
+            setTimeout(() => {
+                // En réalité, vous utiliseriez une API comme:
+                // Stability AI, DALL-E, ou Midjourney
+                currentImageUrl = `https://source.unsplash.com/random/800x600/?${encodeURIComponent(prompt)}`;
+                
+                resultImg.src = currentImageUrl;
+                resultImg.style.display = 'block';
+                loading.style.display = 'none';
+                
+                alert('Image générée avec succès!');
+            }, 2000);
+        }
+        
+        // Simuler la génération de vidéo (remplacer par un vrai appel API)
+        function generateVideo() {
+            const fileInput = document.getElementById('imageUpload');
+            const prompt = document.getElementById('videoPrompt').value;
+            
+            if (!fileInput.files[0] && !currentImageUrl) {
+                alert('Veuillez uploader une image ou générer une image d\'abord');
+                return;
+            }
+            
+            const loading = document.getElementById('videoLoading');
+            const resultVideo = document.getElementById('generatedVideo');
+            
+            loading.style.display = 'block';
+            resultVideo.style.display = 'none';
+            
+            // Simulation d'appel API (remplacer par un vrai appel)
+            setTimeout(() => {
+                // En réalité, vous utiliseriez une API comme:
+                // RunwayML, Pika Labs, ou Kaiber
+                const videoUrl = 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4';
+                
+                resultVideo.src = videoUrl;
+                resultVideo.style.display = 'block';
+                loading.style.display = 'none';
+                
+                alert('Vidéo générée avec succès!');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
