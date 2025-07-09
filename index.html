@@ -3,187 +3,351 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini Vidful Clone</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        .tab-container {
-            display: flex;
-            margin-bottom: 20px;
-        }
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            background: #eee;
-            margin-right: 5px;
-            border-radius: 5px 5px 0 0;
-        }
-        .tab.active {
-            background: #4CAF50;
-            color: white;
-        }
-        .panel {
-            display: none;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 0 0 5px 5px;
-        }
-        .panel.active {
-            display: block;
-        }
-        textarea, input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background: #45a049;
-        }
-        #resultContainer {
-            margin-top: 20px;
-        }
-        #generatedImage, #generatedVideo {
-            max-width: 100%;
-            margin-top: 10px;
-        }
-        .loading {
-            display: none;
-            margin: 10px 0;
-        }
-    </style>
+    <title>IATAAMS Pro - Génération IA Image/Video</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
-<body>
-    <div class="container">
-        <h1>Générateur IA Image → Vidéo</h1>
-        
-        <div class="tab-container">
-            <div class="tab active" onclick="switchTab('image')">Générer une Image</div>
-            <div class="tab" onclick="switchTab('video')">Créer une Vidéo</div>
-        </div>
-        
-        <!-- Panel Génération Image -->
-        <div id="imagePanel" class="panel active">
-            <h2>Générer une image à partir d'un texte</h2>
-            <textarea id="imagePrompt" rows="4" placeholder="Décrivez l'image que vous voulez générer..."></textarea>
-            <button onclick="generateImage()">Générer l'Image</button>
-            <div class="loading" id="imageLoading">Génération en cours...</div>
-            <div id="imageResultContainer">
-                <img id="generatedImage" style="display: none;">
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-8">
+            <h1 class="text-3xl font-bold">IATAAMS PRO</h1>
+            <p class="mt-2">Plateforme professionnelle de génération d'images et vidéos par IA</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <!-- Tabs -->
+            <div class="flex border-b">
+                <button id="imageTab" class="px-6 py-3 font-medium text-blue-600 border-b-2 border-blue-600">Génération d'Image</button>
+                <button id="videoTab" class="px-6 py-3 font-medium text-gray-500">Animation Video</button>
+            </div>
+
+            <!-- Image Generation Panel -->
+            <div id="imagePanel" class="p-6">
+                <h2 class="text-xl font-semibold mb-4">Générez une image à partir de texte</h2>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Prompt détaillé</label>
+                    <textarea id="imagePrompt" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500" rows="4" placeholder="Un paysage futuriste avec des montagnes flottantes..."></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-gray-700 mb-2">Style</label>
+                        <select id="imageStyle" class="w-full p-2 border rounded">
+                            <option value="realistic">Réaliste</option>
+                            <option value="fantasy">Fantaisie</option>
+                            <option value="anime">Anime</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Taille</label>
+                        <select id="imageSize" class="w-full p-2 border rounded">
+                            <option value="512x512">512x512</option>
+                            <option value="768x768">768x768</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Qualité</label>
+                        <select id="imageQuality" class="w-full p-2 border rounded">
+                            <option value="standard">Standard</option>
+                            <option value="hd">HD</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="generateImageBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition duration-200">
+                    Générer l'Image
+                </button>
+                <div id="imageLoading" class="mt-4 hidden">
+                    <div class="flex items-center">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <span class="ml-3">Génération en cours (20-30 sec)...</span>
+                    </div>
+                </div>
+                <div id="imageResult" class="mt-6 hidden">
+                    <h3 class="font-medium mb-2">Résultat :</h3>
+                    <img id="generatedImage" class="rounded-lg shadow-md max-w-full h-auto border">
+                    <div class="mt-4 flex space-x-3">
+                        <button id="downloadImageBtn" class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded">
+                            Télécharger
+                        </button>
+                        <button id="useForVideoBtn" class="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded">
+                            Utiliser pour vidéo
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video Generation Panel -->
+            <div id="videoPanel" class="p-6 hidden">
+                <h2 class="text-xl font-semibold mb-4">Animez votre image en vidéo</h2>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Image source</label>
+                    <div id="videoSourceContainer" class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                        <p id="noImageText">Aucune image sélectionnée</p>
+                        <img id="videoSourceImage" class="hidden max-w-full h-auto mx-auto">
+                    </div>
+                    <input type="file" id="imageUpload" class="hidden" accept="image/*">
+                    <button id="uploadImageBtn" class="mt-2 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded">
+                        Uploader une image
+                    </button>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Paramètres d'animation</label>
+                    <textarea id="videoPrompt" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Décrivez le mouvement souhaité (optionnel)"></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-gray-700 mb-2">Durée</label>
+                        <select id="videoDuration" class="w-full p-2 border rounded">
+                            <option value="3">3 secondes</option>
+                            <option value="5">5 secondes</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Style d'animation</label>
+                        <select id="videoStyle" class="w-full p-2 border rounded">
+                            <option value="smooth">Fluide</option>
+                            <option value="dynamic">Dynamique</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="generateVideoBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition duration-200">
+                    Générer la Vidéo
+                </button>
+                <div id="videoLoading" class="mt-4 hidden">
+                    <div class="flex items-center">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <span class="ml-3">Génération en cours (1-2 min)...</span>
+                    </div>
+                </div>
+                <div id="videoResult" class="mt-6 hidden">
+                    <h3 class="font-medium mb-2">Résultat :</h3>
+                    <video id="generatedVideo" controls class="rounded-lg shadow-md max-w-full border"></video>
+                    <div class="mt-4">
+                        <button id="downloadVideoBtn" class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded">
+                            Télécharger la vidéo
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <!-- Panel Génération Vidéo -->
-        <div id="videoPanel" class="panel">
-            <h2>Créer une vidéo à partir d'une image</h2>
-            <input type="file" id="imageUpload" accept="image/*">
-            <textarea id="videoPrompt" rows="2" placeholder="Décrivez l'animation souhaitée (optionnel)"></textarea>
-            <button onclick="generateVideo()">Créer la Vidéo</button>
-            <div class="loading" id="videoLoading">Création de la vidéo en cours...</div>
-            <div id="videoResultContainer">
-                <video id="generatedVideo" controls style="display: none;"></video>
-            </div>
+
+        <!-- Credits -->
+        <div class="mt-8 text-center text-gray-500 text-sm">
+            <p>Powered by Stable Diffusion & RunwayML APIs - © 2023 IATAAMS Pro</p>
         </div>
     </div>
 
     <script>
+        // Configuration des API (à remplacer par vos clés)
+        const API_CONFIG = {
+            IMAGE_API: 'DEEPAI', // Options: 'DEEPAI', 'REPLICATE'
+            VIDEO_API: 'RUNWAYML',
+            
+            // DeepAI (100 requêtes gratuites/mois)
+            DEEPAI_KEY: 'votre-cle-deepai',
+            
+            // Replicate (payant après quelques essais)
+            REPLICATE_KEY: 'votre-cle-replicate',
+            
+            // RunwayML (125 secondes gratuites)
+            RUNWAYML_KEY: 'votre-cle-runway'
+        };
+
         // Variables globales
-        let currentImageUrl = null;
-        
-        // Basculer entre les onglets
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.panel').forEach(panel => {
-                panel.classList.remove('active');
+        let currentImage = null;
+        let currentVideo = null;
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gestion des onglets
+            document.getElementById('imageTab').addEventListener('click', () => {
+                switchTab('image');
             });
             
-            document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
-            document.getElementById(`${tabName}Panel`).classList.add('active');
+            document.getElementById('videoTab').addEventListener('click', () => {
+                switchTab('video');
+            });
+
+            // Boutons image
+            document.getElementById('generateImageBtn').addEventListener('click', generateImage);
+            document.getElementById('downloadImageBtn').addEventListener('click', downloadImage);
+            document.getElementById('useForVideoBtn').addEventListener('click', useImageForVideo);
+
+            // Boutons vidéo
+            document.getElementById('uploadImageBtn').addEventListener('click', () => {
+                document.getElementById('imageUpload').click();
+            });
+            document.getElementById('imageUpload').addEventListener('change', handleImageUpload);
+            document.getElementById('generateVideoBtn').addEventListener('click', generateVideo);
+            document.getElementById('downloadVideoBtn').addEventListener('click', downloadVideo);
+        });
+
+        // Fonctions principales
+        function switchTab(tab) {
+            if (tab === 'image') {
+                document.getElementById('imageTab').classList.add('text-blue-600', 'border-blue-600');
+                document.getElementById('imageTab').classList.remove('text-gray-500');
+                document.getElementById('videoTab').classList.add('text-gray-500');
+                document.getElementById('videoTab').classList.remove('text-blue-600', 'border-blue-600');
+                document.getElementById('imagePanel').classList.remove('hidden');
+                document.getElementById('videoPanel').classList.add('hidden');
+            } else {
+                document.getElementById('videoTab').classList.add('text-blue-600', 'border-blue-600');
+                document.getElementById('videoTab').classList.remove('text-gray-500');
+                document.getElementById('imageTab').classList.add('text-gray-500');
+                document.getElementById('imageTab').classList.remove('text-blue-600', 'border-blue-600');
+                document.getElementById('videoPanel').classList.remove('hidden');
+                document.getElementById('imagePanel').classList.add('hidden');
+            }
         }
-        
-        // Simuler la génération d'image (remplacer par un vrai appel API)
-        function generateImage() {
+
+        async function generateImage() {
             const prompt = document.getElementById('imagePrompt').value;
             if (!prompt) {
-                alert('Veuillez entrer une description');
+                alert('Veuillez entrer un prompt descriptif');
                 return;
             }
-            
+
             const loading = document.getElementById('imageLoading');
-            const resultImg = document.getElementById('generatedImage');
+            const resultDiv = document.getElementById('imageResult');
             
-            loading.style.display = 'block';
-            resultImg.style.display = 'none';
-            
-            // Simulation d'appel API (remplacer par un vrai appel)
-            setTimeout(() => {
-                // En réalité, vous utiliseriez une API comme:
-                // Stability AI, DALL-E, ou Midjourney
-                currentImageUrl = `https://source.unsplash.com/random/800x600/?${encodeURIComponent(prompt)}`;
+            loading.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+
+            try {
+                let imageUrl;
                 
-                resultImg.src = currentImageUrl;
-                resultImg.style.display = 'block';
-                loading.style.display = 'none';
-                
-                alert('Image générée avec succès!');
-            }, 2000);
+                if (API_CONFIG.IMAGE_API === 'DEEPAI') {
+                    // Appel à l'API DeepAI
+                    const response = await axios.post(
+                        'https://api.deepai.org/api/text2img',
+                        { text: prompt },
+                        { headers: { 'api-key': API_CONFIG.DEEPAI_KEY } }
+                    );
+                    imageUrl = response.data.output_url;
+                } else {
+                    // Appel à l'API Replicate (Stable Diffusion)
+                    const response = await axios.post(
+                        'https://api.replicate.com/v1/predictions',
+                        {
+                            version: "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
+                            input: { prompt }
+                        },
+                        { headers: { 'Authorization': `Token ${API_CONFIG.REPLICATE_KEY}` } }
+                    );
+                    
+                    // Vérification périodique du résultat
+                    const resultUrl = response.data.urls.get;
+                    let result;
+                    do {
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        result = await axios.get(resultUrl, {
+                            headers: { 'Authorization': `Token ${API_CONFIG.REPLICATE_KEY}` }
+                        });
+                    } while (result.data.status !== 'succeeded');
+                    
+                    imageUrl = result.data.output[0];
+                }
+
+                currentImage = imageUrl;
+                document.getElementById('generatedImage').src = imageUrl;
+                resultDiv.classList.remove('hidden');
+            } catch (error) {
+                console.error('Erreur de génération:', error);
+                alert('Erreur lors de la génération. Voir console pour détails.');
+            } finally {
+                loading.classList.add('hidden');
+            }
         }
-        
-        // Simuler la génération de vidéo (remplacer par un vrai appel API)
-        function generateVideo() {
-            const fileInput = document.getElementById('imageUpload');
-            const prompt = document.getElementById('videoPrompt').value;
+
+        function downloadImage() {
+            if (!currentImage) return;
             
-            if (!fileInput.files[0] && !currentImageUrl) {
-                alert('Veuillez uploader une image ou générer une image d\'abord');
+            const link = document.createElement('a');
+            link.href = currentImage;
+            link.download = `ia-image-${Date.now()}.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function useImageForVideo() {
+            if (!currentImage) {
+                alert('Générez d\'abord une image');
                 return;
             }
             
+            switchTab('video');
+            document.getElementById('noImageText').classList.add('hidden');
+            document.getElementById('videoSourceImage').classList.remove('hidden');
+            document.getElementById('videoSourceImage').src = currentImage;
+        }
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                currentImage = event.target.result;
+                document.getElementById('noImageText').classList.add('hidden');
+                document.getElementById('videoSourceImage').classList.remove('hidden');
+                document.getElementById('videoSourceImage').src = currentImage;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function generateVideo() {
+            if (!currentImage) {
+                alert('Veuillez sélectionner ou générer une image d\'abord');
+                return;
+            }
+
+            const prompt = document.getElementById('videoPrompt').value || "Animation fluide";
             const loading = document.getElementById('videoLoading');
-            const resultVideo = document.getElementById('generatedVideo');
+            const resultDiv = document.getElementById('videoResult');
             
-            loading.style.display = 'block';
-            resultVideo.style.display = 'none';
+            loading.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+
+            try {
+                let videoUrl;
+                
+                if (API_CONFIG.VIDEO_API === 'RUNWAYML') {
+                    // Simulation - RunwayML nécessite une intégration plus complexe
+                    // En réalité vous utiliseriez leur SDK ou API
+                    alert('Intégration RunwayML nécessite un backend supplémentaire. Voir documentation.');
+                    
+                    // Simulation avec une vidéo de démo
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                    videoUrl = 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4';
+                } else {
+                    // Alternative avec Pika Labs (nécessite automation)
+                    alert('Pika Labs nécessite une intégration via Discord');
+                    return;
+                }
+
+                currentVideo = videoUrl;
+                document.getElementById('generatedVideo').src = videoUrl;
+                resultDiv.classList.remove('hidden');
+            } catch (error) {
+                console.error('Erreur de génération:', error);
+                alert('Erreur lors de la génération vidéo. Voir console pour détails.');
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+
+        function downloadVideo() {
+            if (!currentVideo) return;
             
-            // Simulation d'appel API (remplacer par un vrai appel)
-            setTimeout(() => {
-                // En réalité, vous utiliseriez une API comme:
-                // RunwayML, Pika Labs, ou Kaiber
-                const videoUrl = 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4';
-                
-                resultVideo.src = videoUrl;
-                resultVideo.style.display = 'block';
-                loading.style.display = 'none';
-                
-                alert('Vidéo générée avec succès!');
-            }, 3000);
+            const link = document.createElement('a');
+            link.href = currentVideo;
+            link.download = `ia-video-${Date.now()}.mp4`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
